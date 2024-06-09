@@ -1,7 +1,6 @@
 ##Master's Thesis
 ##João Lopes
 setwd("C:\\Users\\jdpl2\\OneDrive\\Ambiente de Trabalho\\Mestrado\\2º Ano\\Proteomics")
-
 ##Load a R package
 rm(list = ls())
 #graphics.off()
