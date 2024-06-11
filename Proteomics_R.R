@@ -33,6 +33,8 @@ dir.create("Plots/Barplot")
 dir.create("Plots/PieCharts - All GO terms")
 dir.create("Plots/PieCharts - Top 10 terms")
 dir.create("Plots/Horizontal Barplots - Top 10 terms")
+dir.create("Plots/Horizontal Barplots - Pathways")
+
 dir.create("Plots/PieCharts - Pathways")
 
 ##Directories
@@ -48,6 +50,8 @@ pathBarplot <- "Plots/Barplot/"
 pathPieAllGOterms <- "Plots/PieCharts - All GO terms/"
 pathPieTop10GOterms <- "Plots/PieCharts - Top 10 terms/"
 pathHBarplotGOterms <- "Plots/Horizontal Barplots - Top 10 terms/"
+pathHBarplotPathways <- "Plots/Horizontal Barplots - Pathways/"
+
 pathPiePathways <- "Plots/PieCharts - Pathways/"
 
 
@@ -646,22 +650,41 @@ ggsave(filename = paste(pathBarplot, barplotname, sep = ""), plot = p, device = 
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
-depTable <- depTable[!duplicated(depTable$Accession), ] #A0ZSK3 duplicated
+#dep_pathway <- depTable[!duplicated(depTable$Accession), ] #A0ZSK3 duplicated
+DEP_pathway <- DEP[!duplicated(DEP$Accession), ] #960 duplicated
 
-##Create data frames with Accession, logFC and Pvalue for the pathway analysis
-test_CTL_10vMHW2_10<- data.frame(depTable$Accession,depTable$`logFC-CTL_10vMHW2_10`,depTable$`Pvalue-CTL_10vMHW2_10`)
+
+##Create data frames with Accession, logFC and Pvalue for the pathway analysis (with dep)
+#test_CTL_10vMHW2_10<- data.frame(depTable$Accession,depTable$`logFC-CTL_10vMHW2_10`,depTable$`Pvalue-CTL_10vMHW2_10`)
+#names(test_CTL_10vMHW2_10) <- c("Accession","logFC","Pvalue")
+
+#test_CTL_25vMHW1_25<- data.frame(depTable$Accession,depTable$`logFC-CTL_25vMHW1_25`,depTable$`Pvalue-CTL_25vMHW1_25`)
+#names(test_CTL_25vMHW1_25) <- c("Accession","logFC","Pvalue")
+
+#test_CTL_25vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-CTL_25vMHW2_25`,depTable$`Pvalue-CTL_25vMHW2_25`)
+#names(test_CTL_25vMHW2_25) <- c("Accession","logFC","Pvalue")
+
+#test_MHW1_25vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-MHW1_25vMHW2_25`,depTable$`Pvalue-MHW1_25vMHW2_25`)
+#names(test_MHW1_25vMHW2_25) <- c("Accession","logFC","Pvalue")
+
+#test_MHW2_10vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-MHW2_10vMHW2_25`,depTable$`Pvalue-MHW2_10vMHW2_25`)
+#names(test_MHW2_10vMHW2_25) <- c("Accession","logFC","Pvalue")
+############################################################################
+
+##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
+test_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
 names(test_CTL_10vMHW2_10) <- c("Accession","logFC","Pvalue")
 
-test_CTL_25vMHW1_25<- data.frame(depTable$Accession,depTable$`logFC-CTL_25vMHW1_25`,depTable$`Pvalue-CTL_25vMHW1_25`)
+test_CTL_25vMHW1_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_25vMHW1_25`,DEP_pathway$`Pvalue-CTL_25vMHW1_25`)
 names(test_CTL_25vMHW1_25) <- c("Accession","logFC","Pvalue")
 
-test_CTL_25vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-CTL_25vMHW2_25`,depTable$`Pvalue-CTL_25vMHW2_25`)
+test_CTL_25vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_25vMHW2_25`,DEP_pathway$`Pvalue-CTL_25vMHW2_25`)
 names(test_CTL_25vMHW2_25) <- c("Accession","logFC","Pvalue")
 
-test_MHW1_25vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-MHW1_25vMHW2_25`,depTable$`Pvalue-MHW1_25vMHW2_25`)
+test_MHW1_25vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-MHW1_25vMHW2_25`,DEP_pathway$`Pvalue-MHW1_25vMHW2_25`)
 names(test_MHW1_25vMHW2_25) <- c("Accession","logFC","Pvalue")
 
-test_MHW2_10vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-MHW2_10vMHW2_25`,depTable$`Pvalue-MHW2_10vMHW2_25`)
+test_MHW2_10vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-MHW2_10vMHW2_25`,DEP_pathway$`Pvalue-MHW2_10vMHW2_25`)
 names(test_MHW2_10vMHW2_25) <- c("Accession","logFC","Pvalue")
 ############################################################################
 
@@ -702,7 +725,7 @@ head(odataMHW2_10vMHW2_25$proteome)
 ####################
 
 ##Select the databases we want to query and download pathway definitions
-databases <- c("kegg","reactome")
+databases <- c("kegg")
 pathways <- getMultiOmicsFeatures(dbs = databases, layer = layers,
                                   returnProteome = "UNIPROT",
                                   organism = "drerio",
