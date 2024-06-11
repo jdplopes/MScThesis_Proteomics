@@ -23,40 +23,32 @@ library(readxl)
 library(tidyr)
 windowsFonts(Calibri = windowsFont("Arial"))
 
+########################################Folders########################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
+
 ##Create folders
 dir.create("Files")
 dir.create("Files/Tables")
 dir.create("Plots")
 dir.create("Plots/Volcano plots")
 dir.create("Plots/Heatmap")
-dir.create("Plots/Barplot")
-dir.create("Plots/PieCharts - All GO terms")
-dir.create("Plots/PieCharts - Top 10 terms")
-dir.create("Plots/Horizontal Barplots - Top 10 terms")
-dir.create("Plots/Horizontal Barplots - Pathways")
-
+dir.create("Plots/Barplot - DEPs")
 dir.create("Plots/Vertical Barplots - Pathways")
 
-dir.create("Plots/PieCharts - Pathways")
 
 ##Directories
-##Folders
 pathData <- "Data/"
 pathFiles <- "Files/"
 pathTables <- "Files/Tables/"
-pathGOterms <- "GO terms/"
-pathPlots <- "Plots/"
 pathVolcano <- "Plots/Volcano plots/"
-pathHeatmap <- "Plots/Heatmap/"
-pathBarplot <- "Plots/Barplot/"
-pathPieAllGOterms <- "Plots/PieCharts - All GO terms/"
-pathPieTop10GOterms <- "Plots/PieCharts - Top 10 terms/"
-pathHBarplotGOterms <- "Plots/Horizontal Barplots - Top 10 terms/"
-pathHBarplotPathways <- "Plots/Horizontal Barplots - Pathways/"
-
+pathHeatmap <- "Plots/Heatmap /"
+pathBarplot <- "Plots/Barplot - DEPs/"
 pathVBarplotPathways <- "Plots/Vertical Barplots - Pathways/"
 
-pathPiePathways <- "Plots/PieCharts - Pathways/"
+#ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+########################################Folders########################################
 
 
 
@@ -95,136 +87,6 @@ volcanoPlot<-function(pathFiles, colour, legend, title, contrast, i){
         line = 2,
         cex = 1.5
   )
-}
-
-savePlot<-function(fileName, xDimension, yDimension){
-  print(getwd())
-  print(fileName)
-  dev.print(
-    tiff,
-    fileName, 
-    height = 25, 
-    width = 25, 
-    units = 'cm', 
-    type="windows", 
-    res=600
-  )
-}
-
-PieChart_pathways <- function(contrast,data,path) {
-  print(contrast)
-  terms <- na.omit(data %>%
-                     separate_rows(Pathways, sep = ";") %>%
-                     mutate(Pathways = str_trim(Pathways),
-                            Pathways = gsub("\\s*\\(.*?\\)", "", Pathways)))
-  freq_terms <- sort(table(terms$Pathways), decreasing = TRUE)
-  top_10_freq_terms <- head(freq_terms, 10)
-  pie(top_10_freq_terms, labels = paste(names(top_10_freq_terms), "(", top_10_freq_terms, ")", sep = ""), main = paste("Top 10 altered pathways in ", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-  dev.print(tiff, paste(path, "PieChart-", contrast, "pathway", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-}
-
-PieChart_goterms <- function(GOterm,contrast,data,path) {
-  if (GOterm == "BP") {
-    terms <- na.omit(data[,6])
-    terms <- data %>%
-      separate_rows(`Gene Ontology (biological process)`, sep = ";") %>%
-      mutate(`Gene Ontology (biological process)` = str_trim(`Gene Ontology (biological process)`),
-             `Gene Ontology (biological process)` = gsub("\\s*\\[.*?\\]", "", `Gene Ontology (biological process)`))
-    freq_terms <- sort(table(terms$`Gene Ontology (biological process)`), decreasing = TRUE)
-    top_10_freq_terms <- head(freq_terms, 10)
-    print(paste(top_10_freq_terms,"BP",contrast, sep = " "))
-    cat(paste(rep("-", 111), collapse = ""))
-    pie(top_10_freq_terms, labels = paste(names(top_10_freq_terms), "(", top_10_freq_terms, ")", sep = ""), main = paste("Top 10 altered biological processes in", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-    dev.print(tiff, paste(path[1], "PieChart_top10-", contrast, "BP", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-    pie(freq_terms, labels = paste(names(freq_terms), "(", freq_terms, ")", sep = ""), main = paste("All altered biological processes in", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-    dev.print(tiff, paste(path[2], "PieChart-", contrast, "BP", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-  } else if (GOterm == "CC") {
-    terms <- na.omit(data[,7])
-    terms <- data %>%
-      separate_rows(`Gene Ontology (cellular component)`, sep = ";") %>%
-      mutate(`Gene Ontology (cellular component)` = str_trim(`Gene Ontology (cellular component)`),
-             `Gene Ontology (cellular component)` = gsub("\\s*\\[.*?\\]", "", `Gene Ontology (cellular component)`))
-    freq_terms <- sort(table(terms$`Gene Ontology (cellular component)`), decreasing = TRUE)
-    top_10_freq_terms <- head(freq_terms, 10)
-    print(paste(top_10_freq_terms,"CC",contrast, sep = " "))
-    cat(paste(rep("-", 111), collapse = ""))
-    pie(top_10_freq_terms, labels = paste(names(top_10_freq_terms), "(", top_10_freq_terms, ")", sep = ""), main = paste("Top 10 altered cellular component in", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-    dev.print(tiff, paste(path[1], "PieChart_top10-", contrast, "CC", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-    pie(freq_terms, labels = paste(names(freq_terms), "(", freq_terms, ")", sep = ""), main = paste("All altered cellular component in", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-    dev.print(tiff, paste(path[2], "PieChart-", contrast, "CC", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-  } else if (GOterm == "MF") {
-    terms <- na.omit(data[,8])
-    terms <- data %>%
-      separate_rows(`Gene Ontology (molecular function)`, sep = ";") %>%
-      mutate(`Gene Ontology (molecular function)` = str_trim(`Gene Ontology (molecular function)`),
-             `Gene Ontology (molecular function)` = gsub("\\s*\\[.*?\\]", "", `Gene Ontology (molecular function)`))
-    freq_terms <- sort(table(terms$`Gene Ontology (molecular function)`), decreasing = TRUE)
-    top_10_freq_terms <- head(freq_terms, 10)
-    print(paste(top_10_freq_terms,"MF",contrast, sep = " "))
-    cat(paste(rep("-", 111), collapse = ""))
-    pie(top_10_freq_terms, labels = paste(names(top_10_freq_terms), "(", top_10_freq_terms, ")", sep = ""), main = paste("Top 10 altered molecular function in", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-    dev.print(tiff, paste(path[1], "PieChart_top10-", contrast, "MF", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-    pie(freq_terms, labels = paste(names(freq_terms), "(", freq_terms, ")", sep = ""), main = paste("All altered molecular function in", contrast, sep = " "), cex = 0.6,col = rainbow(length(freq_terms)))
-    dev.print(tiff, paste(path[2], "PieChart-", contrast, "MF", ".tif", sep =""), height = 15, width = 30,  units = 'cm', res=600)
-  }
-}
-
-HorizontalBarplot <- function(GOterm, contrast, data, path) {
-  if (GOterm == "BP") {
-    terms <- na.omit(data[,6])
-    terms <- data %>%
-      separate_rows(`Gene Ontology (biological process)`, sep = ";") %>%
-      mutate(`Gene Ontology (biological process)` = str_trim(`Gene Ontology (biological process)`),
-             `Gene Ontology (biological process)` = gsub("\\s*\\[.*?\\]", "", `Gene Ontology (biological process)`))
-    freq_terms <- as.data.frame(sort(table(terms$`Gene Ontology (biological process)`), decreasing = TRUE))
-    colnames(freq_terms) <- c("Term", "Freq")
-    top_10_freq_terms <- head(freq_terms, 10)
-    p <- top_10_freq_terms %>%
-      mutate(Term = fct_reorder(Term, Freq)) %>%
-      ggplot(aes(x = Term, y = Freq)) +
-      geom_bar(stat = "identity", fill = "#f68060", alpha = .6, width = .4) +
-      coord_flip() +
-      xlab("") +
-      theme_bw() +
-      ggtitle(paste("Horizontal Barplot - Biological Process -", contrast))
-    ggsave(paste(path, "HorizontalBarplot-", contrast, "BP", ".tif", sep =""), plot = p, height = 15, width = 30, units = 'cm', dpi = 600)
-  } else if (GOterm == "CC") {
-    terms <- na.omit(data[,7])
-    terms <- data %>%
-      separate_rows(`Gene Ontology (cellular component)`, sep = ";") %>%
-      mutate(`Gene Ontology (cellular component)` = str_trim(`Gene Ontology (cellular component)`),
-             `Gene Ontology (cellular component)` = gsub("\\s*\\[.*?\\]", "", `Gene Ontology (cellular component)`))
-    freq_terms <- as.data.frame(sort(table(terms$`Gene Ontology (cellular component)`), decreasing = TRUE))
-    colnames(freq_terms) <- c("Term", "Freq")
-    top_10_freq_terms <- head(freq_terms, 10)
-    p <- top_10_freq_terms %>%
-      mutate(Term = fct_reorder(Term, Freq)) %>%
-      ggplot(aes(x = Term, y = Freq)) +
-      geom_bar(stat = "identity", fill = "#f68060", alpha = .6, width = .4) +
-      coord_flip() +
-      xlab("") +
-      theme_bw() +
-      ggtitle(paste("Horizontal Barplot - Cellular Component -", contrast))
-    ggsave(paste(path, "HorizontalBarplot-", contrast, "CC", ".tif", sep =""), plot = p, height = 15, width = 30, units = 'cm', dpi = 600)
-  } else if (GOterm == "MF") {
-    terms <- na.omit(data[,8])
-    terms <- data %>%
-      separate_rows(`Gene Ontology (molecular function)`, sep = ";") %>%
-      mutate(`Gene Ontology (molecular function)` = str_trim(`Gene Ontology (molecular function)`),
-             `Gene Ontology (molecular function)` = gsub("\\s*\\[.*?\\]", "", `Gene Ontology (molecular function)`))
-    freq_terms <- as.data.frame(sort(table(terms$`Gene Ontology (molecular function)`), decreasing = TRUE))
-    colnames(freq_terms) <- c("Term", "Freq")
-    top_10_freq_terms <- head(freq_terms, 10)
-    p <- top_10_freq_terms %>%
-      mutate(Term = fct_reorder(Term, Freq)) %>%
-      ggplot(aes(x = Term, y = Freq)) +
-      geom_bar(stat = "identity", fill = "#f68060", alpha = .6, width = .4) +
-      coord_flip() +
-      xlab("") +
-      theme_bw() +
-      ggtitle(paste("Horizontal Barplot - Molecular Function -", contrast))
-    ggsave(paste(path, "HorizontalBarplot-", contrast, "MF", ".tif", sep =""), plot = p, height = 15, width = 30, units = 'cm', dpi = 600)
-  }
 }
 
 heatmapGraph<-function(heatData,colCutoff, rowCutoff){
@@ -313,8 +175,6 @@ colour<-data.frame(CTL_10vMHW2_10 = c("#0000FF", "#FFA500"),
                    MHW1_25vMHW2_25 = c("#8B4513", "#ADFF2F"),
                    MHW2_10vMHW2_25 = c("#009900", "#800000"))
 
-GOterms <- c("BP","CC","MF")
-
 Levels <- c(
   "CTL_10",
   "MHW2_10",
@@ -349,21 +209,6 @@ Levels <- c(
 ##File with all hits
 file <- read_xlsx(paste(pathData,"CPMSF_GPPF-CM-47_EACMPC1-18_pomatochistus_microps_TMT18_HiRIEF_results.xlsx",sep = ""))
 ####################
-
-##GO term files
-data_GOterms_CTL_10vMHW2_10 <- read_xlsx(paste(pathData,"CTL_10vMHW2_10_GOterms.xlsx",sep = ""))
-data_GOterms_CTL_25vMHW1_25 <- read_xlsx(paste(pathData,"CTL_25vMHW1_25_GOterms.xlsx",sep = ""))
-data_GOterms_CTL_25vMHW2_25 <- read_xlsx(paste(pathData,"CTL_25vMHW2_25_GOterms.xlsx",sep = ""))
-data_GOterms_MHW1_25vMHW2_25 <- read_xlsx(paste(pathData,"MHW1_25vMHW2_25_GOterms.xlsx",sep = ""))
-data_GOterms_MHW2_10vMHW2_25 <- read_xlsx(paste(pathData,"MHW2_10vMHW2_25_GOterms.xlsx",sep = ""))
-###############
-
-##Pathway files
-data_pathways_CTL_10vMHW2_10 <- read_xlsx(paste(pathData,"CTL_10vMHW2_10_pathways.xlsx",sep = ""))
-data_pathways_CTL_25vMHW1_25 <- read_xlsx(paste(pathData,"CTL_25vMHW1_25_pathways.xlsx",sep = ""))
-data_pathways_CTL_25vMHW2_25 <- read_xlsx(paste(pathData,"CTL_25vMHW2_25_pathways.xlsx",sep = ""))
-data_pathways_MHW1_25vMHW2_25 <- read_xlsx(paste(pathData,"MHW1_25vMHW2_25_pathways.xlsx",sep = ""))
-data_pathways_MHW2_10vMHW2_25 <- read_xlsx(paste(pathData,"MHW2_10vMHW2_25_pathways.xlsx",sep = ""))
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -687,59 +532,6 @@ colCutoff = 12
 rowCutoff = 4
 heatmapGraph(heatData,colCutoff, rowCutoff)
 #########
-
-##Horizontal Barplot
-for (term in GOterms) {
-  for (condition in contrasts) {
-    if (condition == "CTL_10vMHW2_10") {
-      HorizontalBarplot(term,condition,data_GOterms_CTL_10vMHW2_10,pathHBarplotGOterms)
-    } else if (condition == "CTL_25vMHW1_25") {
-      HorizontalBarplot(term,condition,data_GOterms_CTL_25vMHW1_25,pathHBarplotGOterms)
-    } else if (condition == "CTL_25vMHW2_25") {
-      HorizontalBarplot(term,condition,data_GOterms_CTL_25vMHW2_25,pathHBarplotGOterms)
-      #else if (condition == "MHW1_25vMHW2_25") {
-      #HorizontalBarplot(term,condition,data_GOterms_MHW1_25vMHW2_25,pathHBarplotGOterms)
-    } else if (condition == "MHW2_10vMHW2_25") {
-      HorizontalBarplot(term,condition,data_GOterms_MHW2_10vMHW2_25,pathHBarplotGOterms)
-    }
-  }
-}
-####################
-
-##Pie charts - GO terms
-piegopaths <- c(pathPieTop10GOterms,pathPieAllGOterms)
-for (term in GOterms) {
-  for (condition in contrasts) {
-    if (condition == "CTL_10vMHW2_10") {
-      PieChart_goterms(term,condition,data_GOterms_CTL_10vMHW2_10,piegopaths)
-    } else if (condition == "CTL_25vMHW1_25") {
-      PieChart_goterms(term,condition,data_GOterms_CTL_25vMHW1_25,piegopaths)
-    } else if (condition == "CTL_25vMHW2_25") {
-      PieChart_goterms(term,condition,data_GOterms_CTL_25vMHW2_25,piegopaths)
-      #else if (condition == "MHW1_25vMHW2_25") {
-      #PieChart(term,condition,data_GOterms_MHW1_25vMHW2_25)
-    } else if (condition == "MHW2_10vMHW2_25") {
-      PieChart_goterms(term,condition,data_GOterms_MHW2_10vMHW2_25,piegopaths)
-    }
-  }
-}
-############
-
-##Pie charts - pathways
-for (condition in contrasts) {
-  if (condition == "CTL_10vMHW2_10") {
-    PieChart_pathways(condition,data_pathways_CTL_10vMHW2_10,pathPiePathways)
-  } else if (condition == "CTL_25vMHW1_25") {
-    PieChart_pathways(condition,data_pathways_CTL_25vMHW1_25,pathPiePathways)
-  } else if (condition == "CTL_25vMHW2_25") {
-    PieChart_pathways(condition,data_pathways_CTL_25vMHW2_25,pathPiePathways)
-    #else if (condition == "MHW1_25vMHW2_25") {
-    #PieChart_pathways(condition,data_pathways_MHW1_25vMHW2_25,pathPiePathways)
-  } else if (condition == "MHW2_10vMHW2_25") {
-    PieChart_pathways(condition,data_pathways_MHW2_10vMHW2_25,pathPiePathways)
-  }
-}
-#######################
 
 ##Barplot
 df_barplot <- dep_per_treatment %>%                          #Reshape the data into long format
