@@ -3,7 +3,7 @@
 setwd("C:\\Users\\jdpl2\\OneDrive\\Ambiente de Trabalho\\Mestrado\\2º Ano\\Proteomics")
 ##Load a R package
 rm(list = ls())
-#graphics.off()
+graphics.off()
 library(forcats)
 library(limma)
 library(readxl)
@@ -35,6 +35,8 @@ dir.create("Plots/PieCharts - Top 10 terms")
 dir.create("Plots/Horizontal Barplots - Top 10 terms")
 dir.create("Plots/Horizontal Barplots - Pathways")
 
+dir.create("Plots/Vertical Barplots - Pathways")
+
 dir.create("Plots/PieCharts - Pathways")
 
 ##Directories
@@ -51,6 +53,8 @@ pathPieAllGOterms <- "Plots/PieCharts - All GO terms/"
 pathPieTop10GOterms <- "Plots/PieCharts - Top 10 terms/"
 pathHBarplotGOterms <- "Plots/Horizontal Barplots - Top 10 terms/"
 pathHBarplotPathways <- "Plots/Horizontal Barplots - Pathways/"
+
+pathVBarplotPathways <- "Plots/Vertical Barplots - Pathways/"
 
 pathPiePathways <- "Plots/PieCharts - Pathways/"
 
@@ -267,6 +271,17 @@ heatmapGraph<-function(heatData,colCutoff, rowCutoff){
             labRow = rownames(heatData))
   recordPlot()
   dev.print(tiff, filename = paste(pathHeatmap, "Heatmap", ".tif", sep = ""), height = 15, width = 15, units = "cm", res = 600)
+}
+
+VerticalBarplot <- function(data, contrast, path) {
+  p <- ggplot(data, aes(x = pathway, y = NES, fill = pval)) +
+    geom_bar(stat = "identity") +
+    scale_fill_gradient(low = "blue", high = "red") +
+    labs(x = "Pathway", y = "Normalized Enrichment Score (NES)") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 4))  # Rotate x-axis labels for better readability
+  ggsave(paste(path, "VerticalBarplot", contrast, ".tiff", sep =""), plot = p, height = 15, width = 15,  units = 'cm', dpi=600)
+  ggsave(paste(path, "VerticalBarplot", contrast, ".svg", sep =""), plot = p, height = 15, width = 15,  units = 'cm', dpi=600)
 }
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -530,6 +545,129 @@ write.table(depTable_MHW1_25vMHW2_25, paste(pathTables, "dep_MHW1_25vMHW2_25.csv
 
 
 
+####################################Pathway analysis###################################
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
+
+DEP_pathway <- DEP[!duplicated(DEP$Accession), ] #960 duplicated
+
+##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
+allp_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
+names(allp_CTL_10vMHW2_10) <- c("Accession","logFC","Pvalue")
+
+allp_CTL_25vMHW1_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_25vMHW1_25`,DEP_pathway$`Pvalue-CTL_25vMHW1_25`)
+names(allp_CTL_25vMHW1_25) <- c("Accession","logFC","Pvalue")
+
+allp_CTL_25vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_25vMHW2_25`,DEP_pathway$`Pvalue-CTL_25vMHW2_25`)
+names(allp_CTL_25vMHW2_25) <- c("Accession","logFC","Pvalue")
+
+allp_MHW1_25vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-MHW1_25vMHW2_25`,DEP_pathway$`Pvalue-MHW1_25vMHW2_25`)
+names(allp_MHW1_25vMHW2_25) <- c("Accession","logFC","Pvalue")
+
+allp_MHW2_10vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-MHW2_10vMHW2_25`,DEP_pathway$`Pvalue-MHW2_10vMHW2_25`)
+names(allp_MHW2_10vMHW2_25) <- c("Accession","logFC","Pvalue")
+############################################################################
+
+##Create a data structure
+layers <- c("proteome")
+odataCTL_10vMHW2_10 <- initOmicsDataStructure(layer=layers)
+odataCTL_25vMHW1_25 <- initOmicsDataStructure(layer=layers)
+odataCTL_25vMHW2_25 <- initOmicsDataStructure(layer=layers)
+odataMHW1_25vMHW2_25 <- initOmicsDataStructure(layer=layers)
+odataMHW2_10vMHW2_25 <- initOmicsDataStructure(layer=layers)
+#########################
+
+##Add proteome layer
+odataCTL_10vMHW2_10$proteome <- rankFeatures(allp_CTL_10vMHW2_10$logFC,allp_CTL_10vMHW2_10$Pvalue)
+names(odataCTL_10vMHW2_10$proteome) <- allp_CTL_10vMHW2_10$Accession
+odataCTL_10vMHW2_10$proteome <- sort(odataCTL_10vMHW2_10$proteome)
+head(odataCTL_10vMHW2_10$proteome)
+
+odataCTL_25vMHW1_25$proteome <- rankFeatures(allp_CTL_25vMHW1_25$logFC,allp_CTL_25vMHW1_25$Pvalue)
+names(odataCTL_25vMHW1_25$proteome) <- allp_CTL_25vMHW1_25$Accession
+odataCTL_25vMHW1_25$proteome <- sort(odataCTL_25vMHW1_25$proteome)
+head(odataCTL_25vMHW1_25$proteome)
+
+odataCTL_25vMHW2_25$proteome <- rankFeatures(allp_CTL_25vMHW2_25$logFC,allp_CTL_25vMHW2_25$Pvalue)
+names(odataCTL_25vMHW2_25$proteome) <- allp_CTL_25vMHW2_25$Accession
+odataCTL_25vMHW2_25$proteome <- sort(odataCTL_25vMHW2_25$proteome)
+head(odataCTL_25vMHW2_25$proteome)
+
+odataMHW1_25vMHW2_25$proteome <- rankFeatures(allp_MHW1_25vMHW2_25$logFC,allp_MHW1_25vMHW2_25$Pvalue)
+names(odataMHW1_25vMHW2_25$proteome) <- allp_MHW1_25vMHW2_25$Accession
+odataMHW1_25vMHW2_25$proteome <- sort(odataMHW1_25vMHW2_25$proteome)
+head(odataMHW1_25vMHW2_25$proteome)
+
+odataMHW2_10vMHW2_25$proteome <- rankFeatures(allp_MHW2_10vMHW2_25$logFC,allp_MHW2_10vMHW2_25$Pvalue)
+names(odataMHW2_10vMHW2_25$proteome) <- allp_MHW2_10vMHW2_25$Accession
+odataMHW2_10vMHW2_25$proteome <- sort(odataMHW2_10vMHW2_25$proteome)
+head(odataMHW2_10vMHW2_25$proteome)
+####################
+
+##Select the databases we want to query and download pathway definitions
+databases <- c("kegg")
+pathways <- getMultiOmicsFeatures(dbs = databases, layer = layers,
+                                  returnProteome = "UNIPROT",
+                                  organism = "drerio",
+                                  useLocal =  FALSE)
+pathways_short <- lapply(names(pathways), function(name) {
+  head(pathways[[name]], 2)
+})
+names(pathways_short) <- names(pathways)
+pathways_short
+pathways$proteome[8]
+########################################################################
+
+##Run the pathway enrichment
+enrichment_scoresCTL_10vMHW2_10 <- multiGSEA(pathways,odataCTL_10vMHW2_10)
+Tenrichment_scoresCTL_10vMHW2_10 <- as.data.frame(enrichment_scoresCTL_10vMHW2_10$proteome)
+Tenrichment_scoresCTL_10vMHW2_10$leadingEdge <- sapply(Tenrichment_scoresCTL_10vMHW2_10$leadingEdge, function(x) paste(x, collapse = ";"))
+write.table(Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
+top_10_Tenrichment_scoresCTL_10vMHW2_10 <- Tenrichment_scoresCTL_10vMHW2_10[order(Tenrichment_scoresCTL_10vMHW2_10$pval), ]
+top_10_Tenrichment_scoresCTL_10vMHW2_10 <- head(top_10_Tenrichment_scoresCTL_10vMHW2_10,10)
+write.table(top_10_Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"top_10_enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
+
+enrichment_scoresCTL_25vMHW1_25 <- multiGSEA(pathways,odataCTL_25vMHW1_25)
+Tenrichment_scoresCTL_25vMHW1_25 <- as.data.frame(enrichment_scoresCTL_25vMHW1_25$proteome)
+Tenrichment_scoresCTL_25vMHW1_25$leadingEdge <- sapply(Tenrichment_scoresCTL_25vMHW1_25$leadingEdge, function(x) paste(x, collapse = ";"))
+write.table(Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
+top_10_Tenrichment_scoresCTL_25vMHW1_25 <- Tenrichment_scoresCTL_25vMHW1_25[order(Tenrichment_scoresCTL_25vMHW1_25$pval), ]
+top_10_Tenrichment_scoresCTL_25vMHW1_25 <- head(top_10_Tenrichment_scoresCTL_25vMHW1_25,10)
+write.table(top_10_Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"top_10_enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
+
+enrichment_scoresCTL_25vMHW2_25 <- multiGSEA(pathways,odataCTL_25vMHW2_25)
+Tenrichment_scoresCTL_25vMHW2_25 <- as.data.frame(enrichment_scoresCTL_25vMHW2_25$proteome)
+Tenrichment_scoresCTL_25vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresCTL_25vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
+write.table(Tenrichment_scoresCTL_25vMHW2_25,paste(pathTables,"enrichment_scoresCTL_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+top_10_Tenrichment_scoresCTL_25vMHW2_25 <- Tenrichment_scoresCTL_25vMHW2_25[order(Tenrichment_scoresCTL_25vMHW2_25$pval), ]
+top_10_Tenrichment_scoresCTL_25vMHW2_25 <- head(top_10_Tenrichment_scoresCTL_25vMHW2_25,10)
+write.table(top_10_Tenrichment_scoresCTL_25vMHW2_25,paste(pathTables,"top_10_enrichment_scoresCTL_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+
+enrichment_scoresMHW1_25vMHW2_25 <- multiGSEA(pathways,odataMHW1_25vMHW2_25)
+enrichment_scoresMHW1_25vMHW2_25$proteome
+Tenrichment_scoresMHW1_25vMHW2_25 <- as.data.frame(enrichment_scoresMHW1_25vMHW2_25$proteome)
+Tenrichment_scoresMHW1_25vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresMHW1_25vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
+write.table(Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+top_10_Tenrichment_scoresMHW1_25vMHW2_25 <- Tenrichment_scoresMHW1_25vMHW2_25[order(Tenrichment_scoresMHW1_25vMHW2_25$pval), ]
+top_10_Tenrichment_scoresMHW1_25vMHW2_25 <- head(top_10_Tenrichment_scoresMHW1_25vMHW2_25,10)
+write.table(top_10_Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"top_10_enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+
+enrichment_scoresMHW2_10vMHW2_25 <- multiGSEA(pathways,odataMHW2_10vMHW2_25)
+enrichment_scoresMHW2_10vMHW2_25$proteome
+Tenrichment_scoresMHW2_10vMHW2_25 <- as.data.frame(enrichment_scoresMHW2_10vMHW2_25$proteome)
+Tenrichment_scoresMHW2_10vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresMHW2_10vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
+write.table(Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+top_10_Tenrichment_scoresMHW2_10vMHW2_25 <- Tenrichment_scoresMHW2_10vMHW2_25[order(Tenrichment_scoresMHW2_10vMHW2_25$pval), ]
+top_10_Tenrichment_scoresMHW2_10vMHW2_25 <- head(top_10_Tenrichment_scoresMHW2_10vMHW2_25,10)
+write.table(top_10_Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"top_10_enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+############################
+
+#ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
+#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
+####################################Pathway analysis###################################
+
+
+
 ##########################################Plots########################################
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
@@ -623,166 +761,22 @@ p <- ggplot(df_barplot, aes(x = Treatments, y = Number_of_Proteins, fill = Expre
 ggsave(filename = paste(pathBarplot, barplotname, sep = ""), plot = p, device = "svg", width = 15, height = 15)
 #########
 
+#Vertical Barplot - Pathways
+for (condition in contrasts) {
+  if (condition == "CTL_10vMHW2_10") {
+    VerticalBarplot(top_10_Tenrichment_scoresCTL_10vMHW2_10,condition,pathVBarplotPathways)
+  } else if (condition == "CTL_25vMHW1_25") {
+    VerticalBarplot(top_10_Tenrichment_scoresCTL_25vMHW1_25,condition,pathVBarplotPathways)
+  } else if (condition == "CTL_25vMHW2_25") {
+    VerticalBarplot(top_10_Tenrichment_scoresCTL_25vMHW2_25,condition,pathVBarplotPathways)
+  } else if (condition == "MHW1_25vMHW2_25") {
+    VerticalBarplot(top_10_Tenrichment_scoresMHW1_25vMHW2_25,condition,pathVBarplotPathways)
+  } else if (condition == "MHW2_10vMHW2_25") {
+    VerticalBarplot(top_10_Tenrichment_scoresMHW2_10vMHW2_25,condition,pathVBarplotPathways)
+  }
+}
+############################
+
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ##########################################Plots########################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####################################Pathway analysis###################################
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
-
-#dep_pathway <- depTable[!duplicated(depTable$Accession), ] #A0ZSK3 duplicated
-DEP_pathway <- DEP[!duplicated(DEP$Accession), ] #960 duplicated
-
-
-##Create data frames with Accession, logFC and Pvalue for the pathway analysis (with dep)
-#test_CTL_10vMHW2_10<- data.frame(depTable$Accession,depTable$`logFC-CTL_10vMHW2_10`,depTable$`Pvalue-CTL_10vMHW2_10`)
-#names(test_CTL_10vMHW2_10) <- c("Accession","logFC","Pvalue")
-
-#test_CTL_25vMHW1_25<- data.frame(depTable$Accession,depTable$`logFC-CTL_25vMHW1_25`,depTable$`Pvalue-CTL_25vMHW1_25`)
-#names(test_CTL_25vMHW1_25) <- c("Accession","logFC","Pvalue")
-
-#test_CTL_25vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-CTL_25vMHW2_25`,depTable$`Pvalue-CTL_25vMHW2_25`)
-#names(test_CTL_25vMHW2_25) <- c("Accession","logFC","Pvalue")
-
-#test_MHW1_25vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-MHW1_25vMHW2_25`,depTable$`Pvalue-MHW1_25vMHW2_25`)
-#names(test_MHW1_25vMHW2_25) <- c("Accession","logFC","Pvalue")
-
-#test_MHW2_10vMHW2_25<- data.frame(depTable$Accession,depTable$`logFC-MHW2_10vMHW2_25`,depTable$`Pvalue-MHW2_10vMHW2_25`)
-#names(test_MHW2_10vMHW2_25) <- c("Accession","logFC","Pvalue")
-############################################################################
-
-##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
-test_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
-names(test_CTL_10vMHW2_10) <- c("Accession","logFC","Pvalue")
-
-test_CTL_25vMHW1_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_25vMHW1_25`,DEP_pathway$`Pvalue-CTL_25vMHW1_25`)
-names(test_CTL_25vMHW1_25) <- c("Accession","logFC","Pvalue")
-
-test_CTL_25vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_25vMHW2_25`,DEP_pathway$`Pvalue-CTL_25vMHW2_25`)
-names(test_CTL_25vMHW2_25) <- c("Accession","logFC","Pvalue")
-
-test_MHW1_25vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-MHW1_25vMHW2_25`,DEP_pathway$`Pvalue-MHW1_25vMHW2_25`)
-names(test_MHW1_25vMHW2_25) <- c("Accession","logFC","Pvalue")
-
-test_MHW2_10vMHW2_25<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-MHW2_10vMHW2_25`,DEP_pathway$`Pvalue-MHW2_10vMHW2_25`)
-names(test_MHW2_10vMHW2_25) <- c("Accession","logFC","Pvalue")
-############################################################################
-
-##Create a data structure
-layers <- c("proteome")
-odataCTL_10vMHW2_10 <- initOmicsDataStructure(layer=layers)
-odataCTL_25vMHW1_25 <- initOmicsDataStructure(layer=layers)
-odataCTL_25vMHW2_25 <- initOmicsDataStructure(layer=layers)
-odataMHW1_25vMHW2_25 <- initOmicsDataStructure(layer=layers)
-odataMHW2_10vMHW2_25 <- initOmicsDataStructure(layer=layers)
-#########################
-
-##Add proteome layer
-odataCTL_10vMHW2_10$proteome <- rankFeatures(test_CTL_10vMHW2_10$logFC,test_CTL_10vMHW2_10$Pvalue)
-names(odataCTL_10vMHW2_10$proteome) <- test_CTL_10vMHW2_10$Accession
-odataCTL_10vMHW2_10$proteome <- sort(odataCTL_10vMHW2_10$proteome)
-head(odataCTL_10vMHW2_10$proteome)
-
-odataCTL_25vMHW1_25$proteome <- rankFeatures(test_CTL_25vMHW1_25$logFC,test_CTL_25vMHW1_25$Pvalue)
-names(odataCTL_25vMHW1_25$proteome) <- test_CTL_25vMHW1_25$Accession
-odataCTL_25vMHW1_25$proteome <- sort(odataCTL_25vMHW1_25$proteome)
-head(odataCTL_25vMHW1_25$proteome)
-
-odataCTL_25vMHW2_25$proteome <- rankFeatures(test_CTL_25vMHW2_25$logFC,test_CTL_25vMHW2_25$Pvalue)
-names(odataCTL_25vMHW2_25$proteome) <- test_CTL_25vMHW2_25$Accession
-odataCTL_25vMHW2_25$proteome <- sort(odataCTL_25vMHW2_25$proteome)
-head(odataCTL_25vMHW2_25$proteome)
-
-odataMHW1_25vMHW2_25$proteome <- rankFeatures(test_MHW1_25vMHW2_25$logFC,test_MHW1_25vMHW2_25$Pvalue)
-names(odataMHW1_25vMHW2_25$proteome) <- test_MHW1_25vMHW2_25$Accession
-odataMHW1_25vMHW2_25$proteome <- sort(odataMHW1_25vMHW2_25$proteome)
-head(odataMHW1_25vMHW2_25$proteome)
-
-odataMHW2_10vMHW2_25$proteome <- rankFeatures(test_MHW2_10vMHW2_25$logFC,test_MHW2_10vMHW2_25$Pvalue)
-names(odataMHW2_10vMHW2_25$proteome) <- test_MHW2_10vMHW2_25$Accession
-odataMHW2_10vMHW2_25$proteome <- sort(odataMHW2_10vMHW2_25$proteome)
-head(odataMHW2_10vMHW2_25$proteome)
-####################
-
-##Select the databases we want to query and download pathway definitions
-databases <- c("kegg")
-pathways <- getMultiOmicsFeatures(dbs = databases, layer = layers,
-                                  returnProteome = "UNIPROT",
-                                  organism = "drerio",
-                                  useLocal =  FALSE)
-pathways_short <- lapply(names(pathways), function(name) {
-  head(pathways[[name]], 2)
-})
-names(pathways_short) <- names(pathways)
-pathways_short
-pathways$proteome[8]
-########################################################################
-
-##Run the pathway enrichment
-enrichment_scoresCTL_10vMHW2_10 <- multiGSEA(pathways,odataCTL_10vMHW2_10)
-Tenrichment_scoresCTL_10vMHW2_10 <- as.data.frame(enrichment_scoresCTL_10vMHW2_10$proteome)
-Tenrichment_scoresCTL_10vMHW2_10$leadingEdge <- sapply(Tenrichment_scoresCTL_10vMHW2_10$leadingEdge, function(x) paste(x, collapse = ";"))
-write.table(Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
-top_10_Tenrichment_scoresCTL_10vMHW2_10 <- Tenrichment_scoresCTL_10vMHW2_10[order(Tenrichment_scoresCTL_10vMHW2_10$pval), ]
-top_10_Tenrichment_scoresCTL_10vMHW2_10 <- head(top_10_Tenrichment_scoresCTL_10vMHW2_10,10)
-write.table(top_10_Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"top_10_enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
-
-
-enrichment_scoresCTL_25vMHW1_25 <- multiGSEA(pathways,odataCTL_25vMHW1_25)
-Tenrichment_scoresCTL_25vMHW1_25 <- as.data.frame(enrichment_scoresCTL_25vMHW1_25$proteome)
-Tenrichment_scoresCTL_25vMHW1_25$leadingEdge <- sapply(Tenrichment_scoresCTL_25vMHW1_25$leadingEdge, function(x) paste(x, collapse = ";"))
-write.table(Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
-top_10_Tenrichment_scoresCTL_25vMHW1_25 <- Tenrichment_scoresCTL_25vMHW1_25[order(Tenrichment_scoresCTL_25vMHW1_25$pval), ]
-top_10_Tenrichment_scoresCTL_25vMHW1_25 <- head(top_10_Tenrichment_scoresCTL_25vMHW1_25,10)
-write.table(top_10_Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"top_10_enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
-
-enrichment_scoresCTL_25vMHW2_25 <- multiGSEA(pathways,odataCTL_25vMHW2_25)
-Tenrichment_scoresCTL_25vMHW2_25 <- as.data.frame(enrichment_scoresCTL_25vMHW2_25$proteome)
-Tenrichment_scoresCTL_25vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresCTL_25vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
-write.table(Tenrichment_scoresCTL_25vMHW2_25,paste(pathTables,"enrichment_scoresCTL_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
-top_10_Tenrichment_scoresCTL_25vMHW2_25 <- Tenrichment_scoresCTL_25vMHW2_25[order(Tenrichment_scoresCTL_25vMHW2_25$pval), ]
-top_10_Tenrichment_scoresCTL_25vMHW2_25 <- head(top_10_Tenrichment_scoresCTL_25vMHW2_25,10)
-write.table(top_10_Tenrichment_scoresCTL_25vMHW2_25,paste(pathTables,"top_10_enrichment_scoresCTL_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
-
-enrichment_scoresMHW1_25vMHW2_25 <- multiGSEA(pathways,odataMHW1_25vMHW2_25)
-enrichment_scoresMHW1_25vMHW2_25$proteome
-Tenrichment_scoresMHW1_25vMHW2_25 <- as.data.frame(enrichment_scoresMHW1_25vMHW2_25$proteome)
-Tenrichment_scoresMHW1_25vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresMHW1_25vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
-write.table(Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
-top_10_Tenrichment_scoresMHW1_25vMHW2_25 <- Tenrichment_scoresMHW1_25vMHW2_25[order(Tenrichment_scoresMHW1_25vMHW2_25$pval), ]
-top_10_Tenrichment_scoresMHW1_25vMHW2_25 <- head(top_10_Tenrichment_scoresMHW1_25vMHW2_25,10)
-write.table(top_10_Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"top_10_enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
-
-enrichment_scoresMHW2_10vMHW2_25 <- multiGSEA(pathways,odataMHW2_10vMHW2_25)
-enrichment_scoresMHW2_10vMHW2_25$proteome
-Tenrichment_scoresMHW2_10vMHW2_25 <- as.data.frame(enrichment_scoresMHW2_10vMHW2_25$proteome)
-Tenrichment_scoresMHW2_10vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresMHW2_10vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
-write.table(Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
-top_10_Tenrichment_scoresMHW2_10vMHW2_25 <- Tenrichment_scoresMHW2_10vMHW2_25[order(Tenrichment_scoresMHW2_10vMHW2_25$pval), ]
-top_10_Tenrichment_scoresMHW2_10vMHW2_25 <- head(top_10_Tenrichment_scoresMHW2_10vMHW2_25,10)
-write.table(top_10_Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"top_10_enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
-############################
-
- #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
-#|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-####################################Pathway analysis###################################
