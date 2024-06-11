@@ -754,7 +754,7 @@ Tenrichment_scoresCTL_25vMHW1_25$leadingEdge <- sapply(Tenrichment_scoresCTL_25v
 write.table(Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
 top_10_Tenrichment_scoresCTL_25vMHW1_25 <- Tenrichment_scoresCTL_25vMHW1_25[order(Tenrichment_scoresCTL_25vMHW1_25$pval), ]
 top_10_Tenrichment_scoresCTL_25vMHW1_25 <- head(top_10_Tenrichment_scoresCTL_25vMHW1_25,10)
-write.table(top_10_Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"top_10_enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+write.table(top_10_Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"top_10_enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresCTL_25vMHW2_25 <- multiGSEA(pathways,odataCTL_25vMHW2_25)
 Tenrichment_scoresCTL_25vMHW2_25 <- as.data.frame(enrichment_scoresCTL_25vMHW2_25$proteome)
