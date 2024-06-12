@@ -35,6 +35,7 @@ dir.create("Plots/Volcano plots")
 dir.create("Plots/Heatmap")
 dir.create("Plots/Barplot - DEPs")
 dir.create("Plots/Vertical Barplots - Pathways")
+dir.create("Plots/Dotplot")
 
 
 ##Directories
@@ -45,6 +46,7 @@ pathVolcano <- "Plots/Volcano plots/"
 pathHeatmap <- "Plots/Heatmap /"
 pathBarplot <- "Plots/Barplot - DEPs/"
 pathVBarplotPathways <- "Plots/Vertical Barplots - Pathways/"
+pathDotplot <- "Plots/Dotplot/"
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
@@ -499,7 +501,7 @@ Tenrichment_scoresMHW1_25vMHW2_25 <- as.data.frame(enrichment_scoresMHW1_25vMHW2
 Tenrichment_scoresMHW1_25vMHW2_25$leadingEdge <- sapply(Tenrichment_scoresMHW1_25vMHW2_25$leadingEdge, function(x) paste(x, collapse = ";"))
 write.table(Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
 sig_Tenrichment_scoresMHW1_25vMHW2_25 <- Tenrichment_scoresMHW1_25vMHW2_25[Tenrichment_scoresMHW1_25vMHW2_25$pval < 0.05, ]
-sig_Tenrichment_scoresMHW1_25vMHW2_25$contrast <- rep("MHW1_25vMHW2_25",10)
+sig_Tenrichment_scoresMHW1_25vMHW2_25$contrast <- rep("MHW1_25vMHW2_25")
 write.table(sig_Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"sig_Tenrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresMHW2_10vMHW2_25 <- multiGSEA(pathways,odataMHW2_10vMHW2_25)
@@ -514,6 +516,7 @@ write.table(sig_Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"sig_Tenrichm
 
 ##Create dataset with all enrichment scores
 combined_df <- rbind(sig_Tenrichment_scoresCTL_10vMHW2_10, sig_Tenrichment_scoresCTL_25vMHW1_25, sig_Tenrichment_scoresCTL_25vMHW2_25, sig_Tenrichment_scoresMHW1_25vMHW2_25, sig_Tenrichment_scoresMHW2_10vMHW2_25)
+combined_df$pathway <- sub("^\\(KEGG\\) ", "", combined_df$pathway)
 ###########################################
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
@@ -558,12 +561,11 @@ p <- ggplot(df_barplot, aes(x = Treatments, y = Number_of_Proteins, fill = Expre
   ylab("Number of Proteins") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(legend.position = "right")
-
 ggsave(filename = paste(pathBarplot, barplotname, sep = ""), plot = p, device = "svg", width = 15, height = 15)
 #########
 
 #Dotplot
-ggplot(combined_df, aes(x = contrast, y = pathway)) +
+o <- ggplot(combined_df, aes(x = contrast, y = pathway)) +
   geom_point(aes(size = pval, color = NES)) +
   scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  # Color scale
   labs(x = "Contrast", y = "Pathway", 
@@ -571,8 +573,9 @@ ggplot(combined_df, aes(x = contrast, y = pathway)) +
        color = "NES") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+ggsave(filename = paste(pathDotplot, "Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
+ggsave(filename = paste(pathDotplot, "Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
 ########
-
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ##########################################Plots########################################
