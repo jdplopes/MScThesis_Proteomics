@@ -572,7 +572,8 @@ o <- ggplot(combined_df, aes(x = contrast, y = pathway)) +
        size = "P-value", 
        color = "NES") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom")  # Rotate x-axis labels for better readability
 ggsave(filename = paste(pathDotplot, "Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
 ggsave(filename = paste(pathDotplot, "Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
 ########
