@@ -394,7 +394,12 @@ write.table(depTable_MHW1_25vMHW2_25, paste(pathTables, "dep_MHW1_25vMHW2_25.csv
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
-DEP_pathway <- DEP[!duplicated(DEP$Accession), ] #960 duplicated
+DEP_pathway <- DEP[c(3,4:23)]
+sum(duplicated(DEP$Accession)) #960 duplicated
+##Calculate mean for duplicateds
+DEP_pathway <- DEP_pathway %>%
+  group_by(Accession) %>%
+  summarize(across(everything(), \(x) mean(x, na.rm = TRUE)))
 
 ##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
 allp_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
