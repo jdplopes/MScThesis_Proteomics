@@ -476,7 +476,7 @@ Tenrichment_scoresCTL_10vMHW2_10 <- as.data.frame(enrichment_scoresCTL_10vMHW2_1
 Tenrichment_scoresCTL_10vMHW2_10$leadingEdge <- sapply(Tenrichment_scoresCTL_10vMHW2_10$leadingEdge, function(x) paste(x, collapse = ";"))
 write.table(Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
 sig_Tenrichment_scoresCTL_10vMHW2_10 <- Tenrichment_scoresCTL_10vMHW2_10[Tenrichment_scoresCTL_10vMHW2_10$pval < 0.05, ]
-sig_Tenrichment_scoresCTL_10vMHW2_10$contrast <- rep("CTL_10vMHW2_10",3)
+sig_Tenrichment_scoresCTL_10vMHW2_10$contrast <- rep("CTL_10vMHW2_10")
 write.table(sig_Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"sig_enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresCTL_25vMHW1_25 <- multiGSEA(pathways,odataCTL_25vMHW1_25)
@@ -566,14 +566,21 @@ ggsave(filename = paste(pathBarplot, barplotname, sep = ""), plot = p, device = 
 
 #Dotplot
 o <- ggplot(combined_df, aes(x = contrast, y = pathway)) +
-  geom_point(aes(size = pval, color = NES)) +
-  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  # Color scale
+  geom_point(aes(size = pval, color = NES, fill = NES), shape = 21, stroke = 0.5) +  
+  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
+  scale_size_continuous(range = c(3, 15)) +
   labs(x = "Contrast", y = "Pathway", 
        size = "P-value", 
-       color = "NES") +
+       color = "NES",
+       fill = "NES") +  
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "bottom")  # Rotate x-axis labels for better readability
+        legend.position = "bottom",
+        panel.grid.major = element_line(linewidth = 1.2, color = "grey90"),  
+        panel.grid.minor = element_line(linewidth = 0.8, color = "grey90"),  
+        panel.background = element_rect(fill = "grey", color = NA))  
+
 ggsave(filename = paste(pathDotplot, "Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
 ggsave(filename = paste(pathDotplot, "Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
 ########
