@@ -92,7 +92,7 @@ volcanoPlot<-function(pathFiles, colour, legend, title, contrast, i){
 }
 
 heatmapGraph<-function(heatData,colCutoff, rowCutoff){
-  heatData<-as.matrix(depTable[,c(4,8,12,16,20)])
+  heatData<-as.matrix(depTable[,c(3,7,11,15,19)])
   rownames(heatData)<-depTable$Description
   head(heatData)
   clustFunction <- function(x) hclust(x, method="complete")
@@ -222,15 +222,14 @@ file <- read_xlsx(paste(pathData,"CPMSF_GPPF-CM-47_EACMPC1-18_pomatochistus_micr
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
-abundance_matrix <- file[,c(1,6,7,26:43)]
+abundance_matrix <- file[,c(6,7,26:43)]
 abundance_matrix <- na.omit(abundance_matrix)
 for (i in 1:nrow(abundance_matrix)) {
   result <- unlist(strsplit(abundance_matrix$Description[i], "OS="))
   previous_part <- result[1]
   abundance_matrix$Description[i] <- previous_part
 }
-colnames(abundance_matrix) <- c("IDs",
-                                "Accession",
+colnames(abundance_matrix) <- c("Accession",
                                 "Description",
                                 "Abundances Normalized T1CTLPm1 MD10(M) - 126",
                                 "Abundances Normalized T3MHW2Pm1 MD10(M) - 127_N",
@@ -250,8 +249,10 @@ colnames(abundance_matrix) <- c("IDs",
                                 "Abundances Normalized T12MHW1Pm1 MD25(M) - 134_N",
                                 "Abundances Normalized T7MHW2Pm1 MD25(M) - 134_C",
                                 "Abundances Normalized T13MHW2Pm1 MD25(M) - 135")
-#IDs_and_description <- abundance_matrix[c(1,3)]
-#IDs_and_accession <- abundance_matrix[1:2]
+sum(duplicated(abundance_matrix$Accession))
+abundance_matrix <- abundance_matrix %>%
+  group_by(Accession, Description) %>%
+  summarize(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
 write.table(abundance_matrix, paste(pathFiles, "Full.csv", sep = ""), sep = ";", col.names = NA)
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
@@ -266,7 +267,7 @@ write.table(abundance_matrix, paste(pathFiles, "Full.csv", sep = ""), sep = ";",
 
 ##Create a DGEList object from a table of counts
 Data <-
-  DGEList(counts = abundance_matrix[4:21],
+  DGEList(counts = abundance_matrix[3:20],
           group = Levels,
           ids = rownames(abundance_matrix))
 ################################################
@@ -288,11 +289,10 @@ MHW1_25vMHW2_25<-relativeExpression(colnames(Design)[3],colnames(Design)[5],Desi
 
 ##Merge the logFC,logCPM,LR and pvalue with the proteins unique ids
 Results<-cbind(CTL_10vMHW2_10$table, MHW2_10vMHW2_25$table, CTL_25vMHW1_25$table, CTL_25vMHW2_25$table, MHW1_25vMHW2_25$table)
-Results<-cbind(abundance_matrix$IDs,abundance_matrix$Description,abundance_matrix$Accession,Results)
+Results<-cbind(abundance_matrix$Accession,abundance_matrix$Description,Results)
 colnames(Results)<-c(
-  "IDs",
-  "Description",
   "Accession",
+  "Description",
   "logFC-CTL_10vMHW2_10",
   "logCPM-CTL_10vMHW2_10",
   "LR-CTL_10vMHW2_10",
@@ -396,12 +396,8 @@ write.table(depTable_MHW1_25vMHW2_25, paste(pathTables, "dep_MHW1_25vMHW2_25.csv
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
-DEP_pathway <- DEP[c(3,4:23)]
+DEP_pathway <- DEP[c(1,3:22)]
 sum(duplicated(DEP$Accession)) #960 duplicated
-##Calculate mean for duplicateds
-DEP_pathway <- DEP_pathway %>%
-  group_by(Accession) %>%
-  summarize(across(everything(), \(x) mean(x, na.rm = TRUE)))
 
 ##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
 allp_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
