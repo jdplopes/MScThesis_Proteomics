@@ -43,7 +43,7 @@ pathData <- "Data/"
 pathFiles <- "Files/"
 pathTables <- "Files/Tables/"
 pathVolcano <- "Plots/Volcano plots/"
-pathHeatmap <- "Plots/Heatmap /"
+pathHeatmap <- "Plots/Heatmap/"
 pathBarplot <- "Plots/Barplot - DEPs/"
 pathVBarplotPathways <- "Plots/Vertical Barplots - Pathways/"
 pathDotplot <- "Plots/Dotplot/"
@@ -553,7 +553,7 @@ for(i in 1:length(contrasts)){
 ##############
 
 ##Heatmap
-colCutoff = 12
+colCutoff = 10
 rowCutoff = 4
 heatmapGraph(heatData,colCutoff, rowCutoff)
 #########
