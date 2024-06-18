@@ -31,10 +31,10 @@ windowsFonts(Calibri = windowsFont("Arial"))
 dir.create("Files")
 dir.create("Files/Tables")
 dir.create("Plots")
+
 dir.create("Plots/Volcano plots")
 dir.create("Plots/Heatmap")
-dir.create("Plots/Barplot - DEPs")
-dir.create("Plots/Vertical Barplots - Pathways")
+dir.create("Plots/Barplot")
 dir.create("Plots/Dotplot")
 
 
@@ -42,10 +42,10 @@ dir.create("Plots/Dotplot")
 pathData <- "Data/"
 pathFiles <- "Files/"
 pathTables <- "Files/Tables/"
+
 pathVolcano <- "Plots/Volcano plots/"
 pathHeatmap <- "Plots/Heatmap/"
-pathBarplot <- "Plots/Barplot - DEPs/"
-pathVBarplotPathways <- "Plots/Vertical Barplots - Pathways/"
+pathBarplot <- "Plots/Barplot/"
 pathDotplot <- "Plots/Dotplot/"
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
@@ -137,16 +137,18 @@ heatmapGraph<-function(heatData,colCutoff, rowCutoff){
   dev.print(tiff, filename = paste(pathHeatmap, "Heatmap", ".tif", sep = ""), height = 15, width = 15, units = "cm", res = 600)
 }
 
-VerticalBarplot <- function(data, contrast, path) {
-  p <- ggplot(data, aes(x = pathway, y = NES, fill = pval)) +
-    geom_bar(stat = "identity") +
-    scale_fill_gradient(low = "blue", high = "red") +
-    labs(x = "Pathway", y = "Normalized Enrichment Score (NES)") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 4))  # Rotate x-axis labels for better readability
-  ggsave(paste(path, "VerticalBarplot", contrast, ".tiff", sep =""), plot = p, height = 15, width = 15,  units = 'cm', dpi=600)
-  ggsave(paste(path, "VerticalBarplot", contrast, ".svg", sep =""), plot = p, height = 15, width = 15,  units = 'cm', dpi=600)
+barplot <- function (data,path) {
+  p <- ggplot(data, aes(x = Treatments, y = Number_of_Proteins, fill = Expression)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_fill_manual(values = c("black", "green", "purple")) + 
+    xlab("Treatments") +
+    ylab("Number of Proteins") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    theme(legend.position = "right")
+  ggsave(filename = paste(path, "Barplot.svg", sep = ""), plot = p, device = "svg", width = 15, height = 15)
+  ggsave(filename = paste(path, "Barplot.tif", sep = ""), plot = p, device = "tif", width = 15, height = 15)
 }
+
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #######################################Functions#######################################
@@ -564,17 +566,7 @@ df_barplot <- dep_per_treatment %>%
          "Nº of proteins","Nº of underexpressed proteins", "Nº of overexpressed proteins")
 df_barplot$Expression <- factor(df_barplot$Expression, 
                                 levels = c("Nº of proteins", "Nº of overexpressed proteins", "Nº of underexpressed proteins"))
-
-
-barplotname <- "Barplot.svg"
-p <- ggplot(df_barplot, aes(x = Treatments, y = Number_of_Proteins, fill = Expression)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("black", "green", "purple")) + 
-  xlab("Treatments") +
-  ylab("Number of Proteins") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(legend.position = "right")
-ggsave(filename = paste(pathBarplot, barplotname, sep = ""), plot = p, device = "svg", width = 15, height = 15)
+barplot(df_barplot,pathBarplot)
 #########
 
 #Dotplot
