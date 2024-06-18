@@ -149,6 +149,26 @@ barplot <- function (data,path) {
   ggsave(filename = paste(path, "Barplot.tif", sep = ""), plot = p, device = "tif", width = 15, height = 15)
 }
 
+dotplot <- function (data,path) {
+  o <- ggplot(data, aes(x = contrast, y = pathway)) +
+    geom_point(aes(size = pval, color = NES, fill = NES), shape = 21, stroke = 0.5) +  
+    scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
+    scale_size_continuous(range = c(3, 15)) +
+    labs(x = "Contrast", y = "Pathway", 
+         size = "P-value", 
+         color = "NES",
+         fill = "NES") +  
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "bottom",
+          panel.grid.major = element_line(linewidth = 1.2, color = "grey90"),  
+          panel.grid.minor = element_line(linewidth = 0.8, color = "grey90"),  
+          panel.background = element_rect(fill = "grey", color = NA))  
+  ggsave(filename = paste(path, "Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
+  ggsave(filename = paste(path, "Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
+}
+
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #######################################Functions#######################################
@@ -570,25 +590,9 @@ barplot(df_barplot,pathBarplot)
 #########
 
 #Dotplot
-o <- ggplot(combined_df, aes(x = contrast, y = pathway)) +
-  geom_point(aes(size = pval, color = NES, fill = NES), shape = 21, stroke = 0.5) +  
-  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
-  scale_size_continuous(range = c(3, 15)) +
-  labs(x = "Contrast", y = "Pathway", 
-       size = "P-value", 
-       color = "NES",
-       fill = "NES") +  
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "bottom",
-        panel.grid.major = element_line(linewidth = 1.2, color = "grey90"),  
-        panel.grid.minor = element_line(linewidth = 0.8, color = "grey90"),  
-        panel.background = element_rect(fill = "grey", color = NA))  
-
-ggsave(filename = paste(pathDotplot, "Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
-ggsave(filename = paste(pathDotplot, "Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
+dotplot(combined_df,pathDotplot)
 ########
+
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ##########################################Plots########################################
