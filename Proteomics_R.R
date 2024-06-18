@@ -218,19 +218,29 @@ file <- read_xlsx(paste(pathData,"CPMSF_GPPF-CM-47_EACMPC1-18_pomatochistus_micr
 
 
 
-######reading the file and creating a matrix with only the normalized abundances#######
+######Reading the file and creating a matrix with only the normalized abundances#######
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
+#Create dataframe with UniProt Accession code, Protein name and normalized abundance of each protein
 abundance_matrix <- file[,c(6,7,26:43)]
+####################################################################################################
+
+#Remove NAs
 abundance_matrix <- na.omit(abundance_matrix)
+###########
+
+#Extract the protein name from the description
 for (i in 1:nrow(abundance_matrix)) {
   result <- unlist(strsplit(abundance_matrix$Description[i], "OS="))
   previous_part <- result[1]
   abundance_matrix$Description[i] <- previous_part
 }
-colnames(abundance_matrix) <- c("Accession",
-                                "Description",
+##############################################
+
+#Column names
+colnames(abundance_matrix) <- c("Accession", 
+                                "Protein",
                                 "Abundances Normalized T1CTLPm1 MD10(M) - 126",
                                 "Abundances Normalized T3MHW2Pm1 MD10(M) - 127_N",
                                 "Abundances Normalized T10CTLPm1 MD10(M) - 127_C",
@@ -249,15 +259,25 @@ colnames(abundance_matrix) <- c("Accession",
                                 "Abundances Normalized T12MHW1Pm1 MD25(M) - 134_N",
                                 "Abundances Normalized T7MHW2Pm1 MD25(M) - 134_C",
                                 "Abundances Normalized T13MHW2Pm1 MD25(M) - 135")
-sum(duplicated(abundance_matrix$Accession))
-abundance_matrix <- abundance_matrix %>%
-  group_by(Accession, Description) %>%
+#############
+
+#Nº of duplicates
+sum(duplicated(abundance_matrix$Accession)) 
+#################
+
+#Mean for duplicates
+abundance_matrix <- abundance_matrix %>% 
+  group_by(Accession, Protein) %>%
   summarize(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
+####################
+
+#Save table with UniProt Accession code, Protein Name and Normalized Abundance for each protein
 write.table(abundance_matrix, paste(pathFiles, "Full.csv", sep = ""), sep = ";", col.names = NA)
+###############################################################################################
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
-######reading the file and creating a matrix with only the normalized abundances#######
+######Reading the file and creating a matrix with only the normalized abundances#######
 
 
 
@@ -287,9 +307,9 @@ CTL_25vMHW2_25<-relativeExpression(colnames(Design)[2],colnames(Design)[5],Desig
 MHW1_25vMHW2_25<-relativeExpression(colnames(Design)[3],colnames(Design)[5],Design,fit)
 ##########################################
 
-##Merge the logFC,logCPM,LR and pvalue with the proteins unique ids
+##Merge the logFC,logCPM,LR and Pvalue with the proteins unique ids
 Results<-cbind(CTL_10vMHW2_10$table, MHW2_10vMHW2_25$table, CTL_25vMHW1_25$table, CTL_25vMHW2_25$table, MHW1_25vMHW2_25$table)
-Results<-cbind(abundance_matrix$Accession,abundance_matrix$Description,Results)
+Results<-cbind(abundance_matrix$Accession,abundance_matrix$Protein,Results)
 colnames(Results)<-c(
   "Accession",
   "Description",
@@ -321,11 +341,9 @@ write.table(Results, paste(pathFiles, "Results.csv", sep = ""), sep = ";", col.n
 ##Calculating the nº of DEPs in general 
 expressionTable<-decideTests(Results[,grepl("Pvalue-", colnames(Results))],coefficients = Results[,grepl("logFC", colnames(Results))], adjust.method = "fdr", lfc = 1.5)
 expressionTable<-as.data.frame(expressionTable)
-head(expressionTable)
 colnames(expressionTable)<-c("CTL_10vMHW2_10", "MHW2_10vMHW2_25", "CTL_25vMHW1_25","CTL_25vMHW2_25","MHW1_25vMHW2_25")
 DEP<-cbind(Results,expressionTable)
 depTable<-DEP[which(abs(DEP$CTL_10vMHW2_10) == 1 | abs(DEP$MHW2_10vMHW2_25) == 1 | abs(DEP$CTL_25vMHW1_25) == 1 | abs(DEP$CTL_25vMHW2_25) == 1 | abs(DEP$MHW1_25vMHW2_25) == 1),]
-head(depTable)
 nrow(depTable) #Nº of DEPs
 write.table(depTable, paste(pathFiles, "DEP.csv", sep = ""), sep = ";", col.names = NA)
 save(CTL_10vMHW2_10, MHW2_10vMHW2_25, CTL_25vMHW1_25, CTL_25vMHW2_25, MHW1_25vMHW2_25, file = "Files/lrt.RData")
@@ -397,7 +415,6 @@ write.table(depTable_MHW1_25vMHW2_25, paste(pathTables, "dep_MHW1_25vMHW2_25.csv
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
 DEP_pathway <- DEP[c(1,3:22)]
-sum(duplicated(DEP$Accession)) #960 duplicated
 
 ##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
 allp_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
@@ -542,7 +559,7 @@ heatmapGraph(heatData,colCutoff, rowCutoff)
 #########
 
 ##Barplot
-df_barplot <- dep_per_treatment %>%                          #Reshape the data into long format
+df_barplot <- dep_per_treatment %>%                          
   gather(key = "Expression", value = "Number_of_Proteins", 
          "Nº of proteins","Nº of underexpressed proteins", "Nº of overexpressed proteins")
 df_barplot$Expression <- factor(df_barplot$Expression, 
