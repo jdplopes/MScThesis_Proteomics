@@ -48,6 +48,7 @@ pathHeatmap <- "Plots/Heatmap/"
 pathBarplot <- "Plots/Barplot/"
 pathDotplot <- "Plots/Dotplot/"
 
+pathBothOmicsPathways <- "C:/Users/jdpl2/OneDrive/Ambiente de Trabalho/Mestrado/2º Ano/Both Omics/"
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ########################################Folders########################################
@@ -437,6 +438,7 @@ write.table(depTable_MHW1_25vMHW2_25, paste(pathTables, "dep_MHW1_25vMHW2_25.csv
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
 
 DEP_pathway <- DEP[c(1,3:22)]
+write.table(DEP_pathway, paste(pathBothOmicsPathways, "DEP_pathway.csv", sep = ""),sep = ";",col.names = TRUE, row.names = FALSE)
 
 ##Create data frames with Accession, logFC and Pvalue for the pathway analysis (all proteins)
 allp_CTL_10vMHW2_10<- data.frame(DEP_pathway$Accession,DEP_pathway$`logFC-CTL_10vMHW2_10`,DEP_pathway$`Pvalue-CTL_10vMHW2_10`)
