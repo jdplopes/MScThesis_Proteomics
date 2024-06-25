@@ -401,25 +401,34 @@ colnames(dep_per_treatment) <- c("Treatments","Nº of underexpressed proteins","
 write.table(dep_per_treatment, paste(pathTables, "dep_per_treatment.csv",sep=""), sep=";", col.names=TRUE, row.names = FALSE)
 ########################################################################################
 
+##Create tables with accession, logFC, Pvalue and Description for all proteins
+depTable_up <- DEP[which(DEP$CTL_10vMHW2_10 == 1 | DEP$MHW2_10vMHW2_25 == 1 | DEP$CTL_25vMHW1_25 == 1 | DEP$CTL_25vMHW2_25 == 1 | DEP$MHW1_25vMHW2_25 == 1),]
+##############################################################################
+
 ##Create tables with accession, logFC, Pvalue and Description for each treatment
 depTable_CTL_10vMHW2_10 <- DEP[which(abs(DEP$CTL_10vMHW2_10) == 1),]
-depTable_CTL_10vMHW2_10 <- depTable_CTL_10vMHW2_10[, c(2,3,4,7)]
+depTable_CTL_10vMHW2_10 <- depTable_CTL_10vMHW2_10[, c(1,2,3,6)]
+depTable_CTL_10vMHW2_10$padj <- p.adjust(depTable_CTL_10vMHW2_10$`Pvalue-CTL_10vMHW2_10`, method = "fdr")
 write.table(depTable_CTL_10vMHW2_10, paste(pathTables, "dep_CTL_10VMHW2_10.csv", sep = ""), sep = ";", col.names = TRUE, row.names = FALSE)
 
 depTable_MHW2_10vMHW2_25 <- DEP[which(abs(DEP$MHW2_10vMHW2_25) == 1),]
-depTable_MHW2_10vMHW2_25 <- depTable_MHW2_10vMHW2_25[, c(2,3,8,11)]
+depTable_MHW2_10vMHW2_25 <- depTable_MHW2_10vMHW2_25[, c(1,2,7,10)]
+depTable_MHW2_10vMHW2_25$padj <- p.adjust(depTable_MHW2_10vMHW2_25$`Pvalue-MHW2_10vMHW2_25`, method = "fdr")
 write.table(depTable_MHW2_10vMHW2_25, paste(pathTables, "dep_MHW2_10vMHW2_25.csv", sep = ""), sep = ";", col.names = TRUE, row.names = FALSE)
 
 depTable_CTL_25vMHW2_25 <- DEP[which(abs(DEP$CTL_25vMHW2_25) == 1),]
-depTable_CTL_25vMHW2_25 <- depTable_CTL_25vMHW2_25[, c(2,3,16,19)]
+depTable_CTL_25vMHW2_25 <- depTable_CTL_25vMHW2_25[, c(1,2,15,18)]
+depTable_CTL_25vMHW2_25$padj <- p.adjust(depTable_CTL_25vMHW2_25$`Pvalue-CTL_25vMHW2_25`, method = "fdr")
 write.table(depTable_CTL_25vMHW2_25, paste(pathTables, "dep_CTL_25vMHW2_25.csv", sep = ""), sep = ";", col.names = TRUE, row.names = FALSE)
 
 depTable_CTL_25vMHW1_25 <- DEP[which(abs(DEP$CTL_25vMHW1_25) == 1),]
-depTable_CTL_25vMHW1_25 <- depTable_CTL_25vMHW1_25[, c(2,3,12,15)]
+depTable_CTL_25vMHW1_25 <- depTable_CTL_25vMHW1_25[, c(1,2,11,14)]
+depTable_CTL_25vMHW1_25$padj <- p.adjust(depTable_CTL_25vMHW1_25$`Pvalue-CTL_25vMHW1_25`, method = "fdr")
 write.table(depTable_CTL_25vMHW1_25, paste(pathTables, "dep_CTL_25vMHW1_25.csv", sep = ""), sep = ";", col.names = TRUE, row.names = FALSE)
 
 depTable_MHW1_25vMHW2_25 <- DEP[which(abs(DEP$MHW1_25vMHW2_25) == 1),]
-depTable_MHW1_25vMHW2_25 <- depTable_MHW1_25vMHW2_25[, c(2,3,20,23)]
+depTable_MHW1_25vMHW2_25 <- depTable_MHW1_25vMHW2_25[, c(1,2,19,22)]
+depTable_MHW1_25vMHW2_25$padj <- p.adjust(depTable_MHW1_25vMHW2_25$`Pvalue-MHW1_25vMHW2_25`, method = "fdr")
 write.table(depTable_MHW1_25vMHW2_25, paste(pathTables, "dep_MHW1_25vMHW2_25.csv", sep = ""), sep = ";", col.names = TRUE, row.names = FALSE)
 ################################################################################
 
