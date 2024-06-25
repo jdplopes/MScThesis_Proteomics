@@ -32,7 +32,6 @@ dir.create("Plots")
 
 dir.create("Plots/Volcano plots")
 dir.create("Plots/Heatmap")
-dir.create("Plots/Barplot")
 dir.create("Plots/Dotplot")
 
 
@@ -43,7 +42,6 @@ pathTables <- "Files/Tables/"
 
 pathVolcano <- "Plots/Volcano plots/"
 pathHeatmap <- "Plots/Heatmap/"
-pathBarplot <- "Plots/Barplot/"
 pathDotplot <- "Plots/Dotplot/"
 
 pathBothOmicsPathways <- "C:/Users/jdpl2/OneDrive/Ambiente de Trabalho/Mestrado/2º Ano/Both Omics/"
@@ -79,9 +77,9 @@ volcanoPlot<-function(pathFiles, colour, legend, title, contrast, i){
   )
   points(DEP[which(DEP[contrast] == 1), paste("logFC-", contrast, sep = "")], -log10(DEP[which(DEP[contrast] == 1), paste("Pvalue-", contrast, sep = "")]), pch = 21, cex = 1.5, col = "black",bg = colour[1,])
   points(DEP[which(DEP[contrast] == -1), paste("logFC-", contrast, sep = "")], -log10(DEP[which(DEP[contrast] == -1), paste("Pvalue-", contrast, sep = "")]), pch = 21, cex = 1.5, col = "black",bg = colour[2,])
-  legend("bottomleft", inset = c(-0.06,-0.5), xpd = TRUE, pch = 20, bty = "n",
-         col = c(colour[1,], colour[2,]), 
-         legend = c(legend[1,], legend[2,]))
+  #legend("bottomleft", inset = c(-0.06,-0.5), xpd = TRUE, pch = 20, bty = "n",
+         #col = c(colour[1,], colour[2,]), 
+         #legend = c(legend[1,], legend[2,]))
   mtext(side = 3,
         LETTERS[i],
         at =-19.6+(-i+1)*3, 
@@ -396,10 +394,10 @@ oedep_MHW1_25vMHW2_25<-sum(depTable$MHW1_25vMHW2_25 == 1);oedep_MHW1_25vMHW2_25
 
 ##Table with total DEP, underexpressed proteins and overexpressed proteins per treatment
 dep_per_treatment <- data.frame(Treatments = contrasts, 
-                                No_of_Proteins = c(DEP_CTL_10vMHW2_10,DEP_CTL_25vMHW1_25,DEP_CTL_25vMHW2_25,DEP_MHW1_25vMHW2_25,DEP_MHW2_10vMHW2_25),
+                                #No_of_Proteins = c(DEP_CTL_10vMHW2_10,DEP_CTL_25vMHW1_25,DEP_CTL_25vMHW2_25,DEP_MHW1_25vMHW2_25,DEP_MHW2_10vMHW2_25),
                                 No_of_underexpressed_Proteins = c(uedep_CTL_10vMHW2_10,uedep_CTL_25vMHW1_25,uedep_CTL_25vMHW2_25,uedep_MHW1_25vMHW2_25,uedep_MHW2_10vMHW2_25),
                                 No_of_overexpressed_Proteins = c(oedep_CTL_10vMHW2_10,oedep_CTL_25vMHW1_25,oedep_CTL_25vMHW2_25,oedep_MHW1_25vMHW2_25,oedep_MHW2_10vMHW2_25))
-colnames(dep_per_treatment) <- c("Treatments","Nº of proteins","Nº of underexpressed proteins","Nº of overexpressed proteins")
+colnames(dep_per_treatment) <- c("Treatments","Nº of underexpressed proteins","Nº of overexpressed proteins")
 write.table(dep_per_treatment, paste(pathTables, "dep_per_treatment.csv",sep=""), sep=";", col.names=TRUE, row.names = FALSE)
 ########################################################################################
 
@@ -576,15 +574,6 @@ for(i in 1:length(contrasts)){
 colCutoff = 10
 rowCutoff = 4
 heatmapGraph(heatData,colCutoff, rowCutoff)
-#########
-
-##Barplot
-df_barplot <- dep_per_treatment %>%                          
-  gather(key = "Expression", value = "Number_of_Proteins", 
-         "Nº of proteins","Nº of underexpressed proteins", "Nº of overexpressed proteins")
-df_barplot$Expression <- factor(df_barplot$Expression, 
-                                levels = c("Nº of proteins", "Nº of overexpressed proteins", "Nº of underexpressed proteins"))
-barplot(df_barplot,pathBarplot)
 #########
 
 #Dotplot
