@@ -110,7 +110,7 @@ heatmapGraph<-function(heatData,colCutoff, rowCutoff){
   windows(xDimension, yDimension)
   par(family="Arial")
   #Heatmap
-  heatColour<-colorRampPalette(c("#fff04a", "#f28e2b", "#c23e40"))(n = 100)
+  heatColour<-colorRampPalette(c("#fff04a", "black", "#c23e40"))(n = 100)
   p <- heatmap.2(heatData,
             hclust=clustFunction, 
             distfun=distFunction, 
@@ -128,7 +128,7 @@ heatmapGraph<-function(heatData,colCutoff, rowCutoff){
             offsetCol = 0,
             srtCol = 45, 
             key.title = NA, 
-            margins = c(8,20),
+            margins = c(8,21.75),
             labRow = rownames(heatData))
   recordPlot()
   dev.print(tiff, filename = paste(pathHeatmap, "Heatmap", ".tif", sep = ""), height = 15, width = 15, units = "cm", res = 600)
@@ -285,9 +285,16 @@ sum(duplicated(abundance_matrix$Accession))
 #################
 
 #Mean for duplicates
-#abundance_matrix <- abundance_matrix %>% 
-  #group_by(Accession, Protein) %>%
-  #summarize(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
+w <- c()
+for (i in c(1:length(unique(abundance_matrix$Accession)))){
+  dups <- which(abundance_matrix$Accession %in% unique(abundance_matrix$Accession)[i])
+  v <- c()
+  for (j in dups){
+    v <- c(v,mean(as.numeric(abundance_matrix[-c(1,2)][j,])))
+  }
+  w = c(w,dups[which(v == max(v))[1]])
+}
+abundance_matrix <- abundance_matrix[w,]
 ####################
 
 #Save table with UniProt Accession code, Protein Name and Normalized Abundance for each protein
