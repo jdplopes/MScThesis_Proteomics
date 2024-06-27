@@ -136,12 +136,12 @@ heatmapGraph<-function(heatData,colCutoff, rowCutoff){
 
 dotplot <- function (data,path) {
   o <- ggplot(data, aes(x = contrast, y = pathway)) +
-    geom_point(aes(size = padj, color = NES, fill = NES), shape = 21, stroke = 0.5) +  
+    geom_point(aes(size = 1-padj, color = NES, fill = NES), shape = 21, stroke = 0.5) +  
     scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
     scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  
     scale_size_continuous(range = c(3, 15)) +
     labs(x = "Contrast", y = "Pathway", 
-         size = "p.adjust", 
+         size = "1-p.adjust", 
          color = "NES",
          fill = "NES") +  
     theme_minimal() +
