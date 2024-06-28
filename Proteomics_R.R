@@ -1,5 +1,6 @@
 ##Master's Thesis
 ##João Lopes
+set.seed(1)
 setwd("C:\\Users\\jdpl2\\OneDrive\\Ambiente de Trabalho\\Mestrado\\2º Ano\\Proteomics")
 ##Load a R package
 library(forcats)
