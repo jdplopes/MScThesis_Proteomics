@@ -145,13 +145,18 @@ dotplot <- function (data,path) {
          color = "NES",
          fill = "NES") +  
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 18),
+          axis.text.y = element_text(size = 18),
+          axis.title.x = element_text(size = 20),
+          axis.title.y = element_text(size = 20),  
           legend.position = "bottom",
+          legend.title = element_text(size = 20),
+          legend.text = element_text(size = 20),
           panel.grid.major = element_line(linewidth = 1.2, color = "grey90"),  
           panel.grid.minor = element_line(linewidth = 0.8, color = "grey90"),  
           panel.background = element_rect(fill = "grey", color = NA))  
-  ggsave(filename = paste(path, "Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
-  ggsave(filename = paste(path, "Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
+  ggsave(filename = paste(path, "Prot_Dotplot_1.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
+  ggsave(filename = paste(path, "Prot_Dotplot_1.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
 }
 
 dotplot_2 <- function(data,path,contrast) {
@@ -295,7 +300,7 @@ colnames(abundance_matrix) <- c("Accession",
 sum(duplicated(abundance_matrix$Accession)) 
 #################
 
-#Mean for duplicates
+#Duplicate with higher mean
 w <- c()
 for (i in c(1:length(unique(abundance_matrix$Accession)))){
   dups <- which(abundance_matrix$Accession %in% unique(abundance_matrix$Accession)[i])
@@ -307,6 +312,12 @@ for (i in c(1:length(unique(abundance_matrix$Accession)))){
 }
 abundance_matrix <- abundance_matrix[w,]
 ####################
+
+#Mean of duplicates
+abundance_matrix <- abundance_matrix %>%
+  group_by(Accession, Protein) %>%
+  summarize(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
+###################
 
 #Save table with UniProt Accession code, Protein Name and Normalized Abundance for each protein
 write.table(abundance_matrix, paste(pathFiles, "Full.csv", sep = ""), sep = ";", col.names = NA)
