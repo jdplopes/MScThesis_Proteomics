@@ -156,31 +156,8 @@ dotplot <- function (data,path) {
           panel.grid.major = element_line(linewidth = 1.2, color = "grey90"),  
           panel.grid.minor = element_line(linewidth = 0.8, color = "grey90"),  
           panel.background = element_rect(fill = "grey", color = NA))  
-  ggsave(filename = paste(path, "Prot_Dotplot_1.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
-  ggsave(filename = paste(path, "Prot_Dotplot_1.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
-}
-
-dotplot_2 <- function(data,path,contrast) {
-  data <- head(data,10)
-  data <- data %>%
-    mutate(pathway = reorder(pathway, NES))
-  o<-ggplot(data, aes(x = NES, y = pathway, color = padj)) +
-    geom_point(size = 5) +  # Adjust the size of the dots as needed
-    scale_color_gradient(low = "blue", high = "red") +  # Adjust the colors as needed
-    theme_minimal() +  # Use a minimal theme
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          legend.position = "bottom",
-          panel.grid.major = element_line(linewidth = 1.2, color = "grey90"),  
-          panel.grid.minor = element_line(linewidth = 0.8, color = "grey90"),  
-          panel.background = element_rect(fill = "grey", color = NA)) +
-    labs(
-      title = "Dot Plot of NES by Pathway",
-      x = "Normalized Enrichment Score (NES)",
-      y = "Pathway",
-      color = "Adjusted P-value"
-    )
-  ggsave(filename = paste(path, "Dotplot-", contrast, ".svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
-  ggsave(filename = paste(path, "Dotplot-", contrast, ".tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
+  ggsave(filename = paste(path, "Prot_Dotplot.svg", sep = ""), plot = o, device = "svg", width = 15, height = 15)
+  ggsave(filename = paste(path, "Prot_Dotplot.tiff", sep = ""), plot = o, device = "tiff", width = 15, height = 15)
 }
 
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
@@ -313,12 +290,6 @@ for (i in c(1:length(unique(abundance_matrix$Accession)))){
 }
 abundance_matrix <- abundance_matrix[w,]
 ####################
-
-#Mean of duplicates
-abundance_matrix <- abundance_matrix %>%
-  group_by(Accession, Protein) %>%
-  summarize(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
-###################
 
 #Save table with UniProt Accession code, Protein Name and Normalized Abundance for each protein
 write.table(abundance_matrix, paste(pathFiles, "Full.csv", sep = ""), sep = ";", col.names = NA)
@@ -550,8 +521,7 @@ Tenrichment_scoresCTL_10vMHW2_10 <- Tenrichment_scoresCTL_10vMHW2_10[order(Tenri
 Tenrichment_scoresCTL_10vMHW2_10$pathway <- sub("^\\(KEGG\\) ", "", Tenrichment_scoresCTL_10vMHW2_10$pathway)
 top_10_Tenrichment_scoresCTL_10vMHW2_10 <- head(Tenrichment_scoresCTL_10vMHW2_10,10)
 top_10_Tenrichment_scoresCTL_10vMHW2_10$contrast <- rep("CTL_10vMHW2_10")
-#write.table(Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
-
+write.table(top_10_Tenrichment_scoresCTL_10vMHW2_10,paste(pathTables,"top10_enrichment_scoresCTL_10vMHW2_10.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresCTL_25vMHW1_25 <- multiGSEA(pathways,odataCTL_25vMHW1_25)
 Tenrichment_scoresCTL_25vMHW1_25 <- as.data.frame(enrichment_scoresCTL_25vMHW1_25$proteome)
@@ -560,7 +530,7 @@ Tenrichment_scoresCTL_25vMHW1_25 <- Tenrichment_scoresCTL_25vMHW1_25[order(Tenri
 Tenrichment_scoresCTL_25vMHW1_25$pathway <- sub("^\\(KEGG\\) ", "", Tenrichment_scoresCTL_25vMHW1_25$pathway)
 top_10_Tenrichment_scoresCTL_25vMHW1_25 <- head(Tenrichment_scoresCTL_25vMHW1_25,10)
 top_10_Tenrichment_scoresCTL_25vMHW1_25$contrast <- rep("CTL_25vMHW1_25")
-#write.table(Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
+write.table(top_10_Tenrichment_scoresCTL_25vMHW1_25,paste(pathTables,"top10_enrichment_scoresCTL_25vMHW1_25.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresCTL_25vMHW2_25 <- multiGSEA(pathways,odataCTL_25vMHW2_25)
 Tenrichment_scoresCTL_25vMHW2_25 <- as.data.frame(enrichment_scoresCTL_25vMHW2_25$proteome)
@@ -569,7 +539,7 @@ Tenrichment_scoresCTL_25vMHW2_25 <- Tenrichment_scoresCTL_25vMHW2_25[order(Tenri
 Tenrichment_scoresCTL_25vMHW2_25$pathway <- sub("^\\(KEGG\\) ", "", Tenrichment_scoresCTL_25vMHW2_25$pathway)
 top_10_Tenrichment_scoresCTL_25vMHW2_25 <- head(Tenrichment_scoresCTL_25vMHW2_25,10)
 top_10_Tenrichment_scoresCTL_25vMHW2_25$contrast <- rep("CTL_25vMHW2_25")
-#write.table(Tenrichment_scoresCTL_25vMHW2_25,paste(pathTables,"enrichment_scoresCTL_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+write.table(top_10_Tenrichment_scoresCTL_25vMHW2_25,paste(pathTables,"top10_enrichment_scoresCTL_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresMHW1_25vMHW2_25 <- multiGSEA(pathways,odataMHW1_25vMHW2_25)
 Tenrichment_scoresMHW1_25vMHW2_25 <- as.data.frame(enrichment_scoresMHW1_25vMHW2_25$proteome)
@@ -578,7 +548,7 @@ Tenrichment_scoresMHW1_25vMHW2_25 <- Tenrichment_scoresMHW1_25vMHW2_25[order(Ten
 Tenrichment_scoresMHW1_25vMHW2_25$pathway <- sub("^\\(KEGG\\) ", "", Tenrichment_scoresMHW1_25vMHW2_25$pathway)
 top_10_Tenrichment_scoresMHW1_25vMHW2_25 <- head(Tenrichment_scoresMHW1_25vMHW2_25,10)
 top_10_Tenrichment_scoresMHW1_25vMHW2_25$contrast <- rep("MHW1_25vMHW2_25")
-#write.table(Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+write.table(top_10_Tenrichment_scoresMHW1_25vMHW2_25,paste(pathTables,"top10_enrichment_scoresMHW1_25vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
 
 enrichment_scoresMHW2_10vMHW2_25 <- multiGSEA(pathways,odataMHW2_10vMHW2_25)
 Tenrichment_scoresMHW2_10vMHW2_25 <- as.data.frame(enrichment_scoresMHW2_10vMHW2_25$proteome)
@@ -587,7 +557,7 @@ Tenrichment_scoresMHW2_10vMHW2_25 <- Tenrichment_scoresMHW2_10vMHW2_25[order(Ten
 Tenrichment_scoresMHW2_10vMHW2_25$pathway <- sub("^\\(KEGG\\) ", "", Tenrichment_scoresMHW2_10vMHW2_25$pathway)
 top_10_Tenrichment_scoresMHW2_10vMHW2_25 <- head(Tenrichment_scoresMHW2_10vMHW2_25,10)
 top_10_Tenrichment_scoresMHW2_10vMHW2_25$contrast <- rep("MHW2_10vMHW2_25")
-#write.table(Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
+write.table(top_10_Tenrichment_scoresMHW2_10vMHW2_25,paste(pathTables,"top10_enrichment_scoresMHW2_10vMHW2_25.csv",sep=""),sep=";",row.names = FALSE)
 ############################
 
 ##Create dataset with all enrichment scores
@@ -624,25 +594,6 @@ heatmapGraph(heatData,colCutoff, rowCutoff)
 dotplot(combined_df,pathDotplot)
 ########
 
-#Dotplot for each treatment
-###########################
-for(i in 1:length(contrasts)){
-  if (contrasts[i] == "CTL_10vMHW2_10") {
-    dotplot_2(Tenrichment_scoresCTL_10vMHW2_10,pathDotplot,contrasts[i])
-  }
-  else if (contrasts[i] == "CTL_25vMHW1_25") {
-    dotplot_2(Tenrichment_scoresCTL_25vMHW1_25,pathDotplot,contrasts[i])
-  }
-  else if (contrasts[i] == "CTL_25vMHW2_25") {
-    dotplot_2(Tenrichment_scoresCTL_25vMHW2_25,pathDotplot,contrasts[i])
-  }
-  else if (contrasts[i] == "MHW1_25vMHW2_25") {
-    dotplot_2(Tenrichment_scoresMHW1_25vMHW2_25,pathDotplot,contrasts[i])
-  }
-  else if (contrasts[i] == "MHW2_10vMHW2_25") {
-    dotplot_2(Tenrichment_scoresMHW2_10vMHW2_25,pathDotplot,contrasts[i])
-  }
-}
 #ΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛΛ#
 #|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#
 ##########################################Plots########################################
