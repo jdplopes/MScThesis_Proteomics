@@ -3,23 +3,18 @@
 set.seed(1)
 setwd("C:\\Users\\jdpl2\\OneDrive\\Ambiente de Trabalho\\Mestrado\\2º Ano\\Proteomics")
 ##Load a R package
-library(forcats)
 library(limma)
-library(readxl)
 library(edgeR)
-library(seqinr)
-library(tximport)
-library(RColorBrewer)
-library(gplots)
-#library(biomaRt) #notusing
-#library(preprocessCore) #notusing
-library(rhdf5)
 library(ggplot2)
-#library(UniprotR) #error
-library(multiGSEA)
+library(gplots)
+library(RColorBrewer)
+library(seqinr)
+library(data.table)
 library(tidyverse)
+library(tximport)
 library(readxl)
 library(tidyr)
+library(multiGSEA)
 windowsFonts(Calibri = windowsFont("Arial"))
 
 ########################################Folders########################################
@@ -365,7 +360,7 @@ colnames(expressionTable)<-c("CTL_10vMHW2_10", "MHW2_10vMHW2_25", "CTL_25vMHW1_2
 DEP<-cbind(Results,expressionTable)
 depTable<-DEP[which(abs(DEP$CTL_10vMHW2_10) == 1 | abs(DEP$MHW2_10vMHW2_25) == 1 | abs(DEP$CTL_25vMHW1_25) == 1 | abs(DEP$CTL_25vMHW2_25) == 1 | abs(DEP$MHW1_25vMHW2_25) == 1),]
 nrow(depTable) #Nº of DEPs
-write.table(depTable, paste(pathFiles, "DEP.csv", sep = ""), sep = ";", col.names = NA)
+write.table(depTable, paste(pathBothOmicsPathways, "DEP.csv", sep = ""), sep = ";", col.names = NA)
 save(CTL_10vMHW2_10, MHW2_10vMHW2_25, CTL_25vMHW1_25, CTL_25vMHW2_25, MHW1_25vMHW2_25, file = "Files/lrt.RData")
 #######################################
 
